@@ -14,11 +14,6 @@ Applecorn Man Features:
 * Ghosts are slower when vulnerable
 * AI similar to Pac Man AI
 * Level layouts can be added (modified, really, as memory is now full)
-* . The ghost house must have the same dimensions (but can be moved)
-* . The ghost directions at start are hard coded
-* . The patrol locations are hard coded (but this can easily be adapted with a new layout type)
-* . Wrapping can only happen left/right, not up/down
-* . Ghost A must be outside house (hard coded for patrol) and will go left
 * No sound (not really a feature)
 * And lastly, almost certainly bugs
 
@@ -46,7 +41,6 @@ HS | high score
 K | keyboard key pressed  
 LC | Num levels -1  
 NAP | number of active players 0 or 1  
-NT | no time bool is true when TIME doesn't work   
 PAF | player animation frame 0..3  
 PAT | player animation time - move/animate < 0  
 PD | player direction (0=up,1=right,2=down,3=left)  
@@ -93,7 +87,7 @@ LTX(3) | ghost patrol targets X
 LTY(3) | ghost patrol targets Y  
 NE(3,3) | next dir for a dir (same,right,left,reverse per direction)  
 OP(3) | opposite directions ex. OP(0)=2  
-OS(1,24,23) | of screen (back store) level layout for each player  
+OS(1,24,23) | off screen (back store) level layout for each player  
 PA$(4,3) | player animation frames to print  
 PDE(1) | player dots eaten  
 PL(1) | player lives  
@@ -106,7 +100,7 @@ PWA$(1) | power dot animation characters to print
 PWX(LC,3) | location of the power dots X on each level  
 PWY(LC,3) | location of the power dots Y on each level  
 UIX(4) | ui marquee starting draw dots x  
-UIY(4) | ui marquee starting draw dots x  
+UIY(4) | ui marquee starting draw dots y  
 
 ### Level Layout Data
 Name |Desc
@@ -143,7 +137,7 @@ gtPS   =5 | Player movement Speed
 gtPGH  =6 | Pre Go Hold (How long READY stays up)  
 gtSH   =7 | State Hunt (duration of hunt mode)  
 gtSP   =8 | State Patrol (duration of patrol mode)  
-gtGML  =9 | Ghost Mode Len (duration of ghost mode after powerup)  
+gtGML  =9 | Ghost Mode Length (duration of ghost mode after powerup)  
 gtPA   =10 | Power Anim (animation speed of power up)  
 
 -- OST% is for timing.  By setting dt to 1 in PROCtime and zero-ing out some of these, this will work on a machine without TIME but the fps at 1 or even 2.8 MHz makes it not worth-while.  
