@@ -145,6 +145,7 @@ gtSH   =7 | State Hunt (duration of hunt mode)
 gtSP   =8 | State Patrol (duration of patrol mode)  
 gtGML  =9 | Ghost Mode Len (duration of ghost mode after powerup)  
 gtPA   =10 | Power Anim (animation speed of power up)  
+
 -- OST% is for timing.  By setting dt to 1 in PROCtime and zero-ing out some of these, this will work on a machine without TIME but the fps at 1 or even 2.8 MHz makes it not worth-while.  
 
 ## Level design constraints
