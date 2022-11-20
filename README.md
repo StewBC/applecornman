@@ -36,6 +36,8 @@ swessels@email.com
 ## Key to variables and data/state definitions.
 
 ### Global Variables
+Name |Desc
+--- |---
 AL | active level (0 based)  
 AP | active player 0/1  
 ET | elapsed time (only for dt calculation)  
@@ -62,6 +64,8 @@ ST | level state - patrol or hunt
 STM | time to level state switch  
 
 ### Global Arrays
+Name |Desc
+--- |---
 DIX(3) | x components of direction (0,1,0,-1)  
 DIY(3) | y components of direction (-1,0,1,0)  
 GA(4,3,3) | ghost animation frame indices - each ghost has 4 frames per direction  
@@ -105,6 +109,8 @@ UIX(4) | ui marquee starting draw dots x
 UIY(4) | ui marquee starting draw dots x  
 
 ### Level Layout Data
+Name |Desc
+--- |---
 a | walls  
 b | ghost house door  
 c | blank (space)  
@@ -117,6 +123,8 @@ i | ghost
 j | player  
 
 ### Ghost States
+Name |Desc
+--- |---
 gsPTRL =1 | patrol (target corners)  
 gsHUNT =2 | hunt (target Applecorn Man)  
 gsHOLD =3 | hold (in house at start)  
@@ -124,6 +132,8 @@ gsEXIT =4 | exit house
 gsDEAD =5 | dead (seek house)  
 
 ### Indices in OST%
+Name |Desc
+--- |---
 gtGDS  =0 | Ghost Dead movement Speed (movement and animation are tied)  
 gtGNS  =1 | Ghost Normal movement Speed  
 gtGR   =2 | Ghost Release from house (index * this value)  
