@@ -1,0 +1,347 @@
+CLS:MODE6:PRINT"Please Wait...":PROCvariables:PROClevelLayoutsAndCal:PROCanimSetup:*FX4,1
+REPEAT:PROCui:IFNAP>=0 PROCnewGame:UNTIL NAP<0:*FX4,0
+END
+DEF PROCvariables
+    gtGDS=0:gtGNS=1:gtGR=2:gtIH=3:gtM=4:gtPS=5:gtPGH=6:gtSH=7:gtSP=8:gtGML=9:gtPA=10
+    gsPTRL=1:gsHUNT=2:gsHOLD=3:gsEXIT=4:gsDEAD=5
+    LC=2:HS=0:RU=-1:PAT=0:PWT=0:NAP=0:ET=0:PAF=0:AP=0:SL=0:GMS=100
+    PWF=0:PNX=0:PNY=0:PDX=0:PDY=0:PX=0:PY=0:K=0:GGT=0:AL=0:PD=3
+    DIM LS(LC,24,23),LSS(LC),LL$(5),OS(1,24,23),PWX(LC,3),PWY(LC,3),PWA$(1),LEX(3),LEY(3)
+    DIM GX(3),GY(3),GSX(1,3),GSY(1,3),GA(4,3,3),GAF(3),GAT(3),GCT(3),GM(3),GS(3),GST(3)
+    DIM GTX(3),GTY(3),GD(3),LTX(3),LTY(3),HOX(3,3),HOY(3,3),OP(3),DIX(3),DIY(3),NE(3,3)
+    DIM PSX(1),PSY(1),PA$(4,3),PV(1),PL(1),PS(1),PDE(1),PNL(1),OST%(10)
+    DIM UIX(4),UIY(4):ST=gsPTRL:STM=0:FORr=0TO3:READOP(r),LTX(r),LTY(r),DIX(r),DIY(r)
+    FORc=0TO3:READHOX(c,r),HOY(c,r),NE(c,r):NEXTc,r:FORi=0TO10:READOST%(i):NEXTi
+    LL$(1)=CHR$(255):LL$(2)=" ":LL$(3)=" ":LL$(4)=".":LL$(5)="O"
+ENDPROC
+DEF PROCanimSetup
+    FORd=0TO4:FORf=0TO3:READPA$(d,f):NEXTf,d
+    FORg=0TO4:FORd=0TO3:FORf=0TO3:READGA(g,d,f):NEXTf,d,g
+    READPWA$(0):READPWA$(1)
+ENDPROC
+PROCcalibrateNoTime
+ENDPROC
+DEF PROCui
+    CLS:RU=-1:UIX(0)=12:UIY(0)=3:UIX(1)=22:UIY(1)=3
+    UIX(2)=29:UIY(2)=6:UIX(3)=22:UIY(3)=9:UIX(4)=12:UIY(4)=9
+    ET=TIME:STM=OST%(gtIH):ST=gsPTRL:PROCuiIntroSetup
+    PRINTTAB(1,0);"P1";TAB(1,1);FNzeroString(PS(0));TAB(17,0);"HSCORE";TAB(17,1);FNzeroString(HS)
+    IF NAP=1 PRINTTAB(37,0);"P2";TAB(33,1);FNzeroString(PS(1))
+    PRINTTAB(4,13);"PRESS:    1 FOR ONE PLAYER GAME"
+    PRINTTAB(4,14);"          2 FOR TWO PLAYER GAME"
+    PRINTTAB(4,15);"          Q TO QUIT"
+    PRINTTAB(4,18);"CONTROLS: CURSOR KEYS OR"
+    PRINTTAB(4,19);"          W - UP      A - LEFT"
+    PRINTTAB(4,20);"          S - DOWN    D - RIGHT"
+    PRINTTAB(6,23);"BY STEFAN WESSELS, NOV. 2022";
+    REPEAT
+        PWT=OST%(gtM):REPEAT:PROCtime:UNTIL PWT<0
+        FORi=0TO4:udx=0:udy=0:PRINTTAB(UIX(i),UIY(i));"-";
+            IFUIY(i)=3 udx=-1 ELSE IFUIY(i)=9 udx=1
+            IFudx<=0 AND UIX(i)=10 udx=0:udy=1 ELSE IFudx>=0 AND UIX(i)=29 udx=0:udy=-1
+            UIX(i)=UIX(i)+udx:UIY(i)=UIY(i)+udy:PRINTTAB(UIX(i),UIY(i));"=";
+        NEXTi:PRINTTAB(0,23);:K=INKEY(0)
+        IFK=49 NAP=0:RU=0
+        IFK=50 NAP=1:RU=0
+        IFK=81 NAP=-1:RU=0
+        IFSTM<0 PROCuiIntro
+    UNTIL NOT RU:CLS
+ENDPROC
+DEF PROCuiIntroSetup
+    PRINTTAB(12,5);"        ";TAB(15,7)"             ";TAB(19,11);" "
+    FORi=0TO3:GX(i)=39:GY(i)=10:GCT(i)=OST%(gtGNS):GS(i)=gsHOLD:NEXTi
+    ust=0:AL=0:LEX(0)=8:LEY(0)=4:PX=39:PY=11:PD=3
+ENDPROC
+DEF PROCuiIntro
+    IFust=4 PRINTTAB(12,5);"    ";TAB(14,7);"    ";TAB(12,5);"STARRING";TAB(15,7)"APPLECORN MAN":ust=ust+1
+    IFust=5 PROCintroAppleman:ENDPROC
+    IFust=6 STM=OST%(gtIH):ust=7:ENDPROC
+    IFust=7 FORi=0TO3:PRINTTAB(GX(i),GY(i));" ":NEXTi:PROCuiIntroSetup
+    IFGS(ust)=gsHOLD PROCuiPresent(ust)
+    IFGS(ust)<>gsEXIT ust=ust+1:ENDPROC
+    PROCmoveUiGhost(ust)
+ENDPROC
+DEF PROCuiPresent(g)
+    LEY(0)=LEY(0)+1:GS(g)=gsEXIT
+    PRINTTAB(12,5);"WITH";TAB(14+g,7);CHR$(GA(g,0,0))
+ENDPROC
+DEF PROCmoveUiGhost(g)
+    IFGAT(g)>0 ENDPROC
+    GAT(g)=GCT(g):GAF(g)=(GAF(g)+1)MOD4:PRINTTAB(GX(g),GY(g));" "
+    PROCexit:PRINTTAB(GX(g),GY(g));CHR$(GA(g,GD(g),GAF(g)))
+ENDPROC
+DEF PROCintroAppleman
+    IFPAT>0 ENDPROC
+    PAT=OST%(gtPS):PAF=(PAF+1)MOD4:PRINTTAB(PX,PY);" ":PX=PX-1
+    PRINTTAB(PX,PY);PA$(PD,PAF):IFPX=19 ust=ust+1
+ENDPROC
+DEF PROCnewGame
+    PS(0)=0:PS(1)=0:PV(0)=0:PV(1)=0:PL(0)=0:PL(1)=0:PAF=0
+    AP=0:PNL(0)=-1:PNL(1)=-1:SL=-1
+    FORi=0TONAP:PL(i)=3:NEXTi
+    PRINTTAB(6,0);"Please Wait...";TAB(26,2);"HSCORE";TAB(26,3);FNzeroString(HS)
+    PRINTTAB(26,5);"PLAYER";TAB(27,8);"LIVES";TAB(27,11);"SCORE";TAB(26,12);FNzeroString(PS(AP))
+    PRINTTAB(31,6);AP+1;TAB(29,9);RIGHT$("  "+STR$(PL(AP)-1),3)
+    REPEAT:RU=-1:IFPNL(AP) PROClevelPrep:PNL(AP)=0:SL=-1
+        PROCstageSetup:IFSL PROCshowLevel:SL=0
+        PROCplay:IFNOT RU PROCdie
+    UNTIL PL(0)+PL(1)=0
+ENDPROC
+DEF PROCstageSetup
+    PWF=0:PNX=0:PNY=0:PDX=-1:PDY=0:AL=PV(AP):PX=PSX(AP):PY=PSY(AP):PO=OS(AP,PX,PY):PD=3:ST=gsDEAD
+    FORi=0TO3:GX(i)=GSX(AP,i):GY(i)=GSY(AP,i):GTX(i)=GSX(AP,i):GAF(i)=0:GCT(i)=OST%(gtGNS)
+    GM(i)=0:GS(i)=gsHOLD:GST(i)=i*OST%(gtGR):NEXTi
+    GTX(0)=2:GTY(0)=1:GTY(1)=GY(1)+2:GTY(2)=GY(2)-2:GTY(3)=GY(3)-2
+    GD(0)=3:GD(1)=2:GD(2)=0:GD(3)=0:GS(0)=gsPTRL
+    PRINTTAB(31,6);AP+1;TAB(29,9);RIGHT$("  "+STR$(PL(AP)-1),3)
+    PROCscore(0):PROCgameState
+ENDPROC
+DEF PROCplay
+    ET=TIME:PRINTTAB(PX,PY);PA$(3,0);TAB(0,23);TAB(27,16);"READY"
+    PAT=OST%(gtPGH):PWT=0:FORi=0TO3:GAT(i)=0:NEXTi
+    REPEAT:PROCtime:IFPWT<0 PROCanimatePowerups
+    UNTIL PAT<0:PRINTTAB(27,16);"     "
+    REPEAT:PROCtime:K=INKEY(0)
+        IFK>0 PROCkey
+        IFSTM<0 PROCgameState
+        IFPWT<0 PROCanimatePowerups
+        IFPAT<0 PROCmovePlayer
+        FORg=0TO3:IFGAT(g)<0 PROCmoveGhost
+        NEXTg:PRINTTAB(0,23);
+        FORg=0TO3:IFPX=GX(g) AND PY=GY(g) PROCcollision
+        NEXTg
+    UNTIL NOT RU OR PNL(AP)
+    IFPNL(AP) PRINTTAB(27,16);"NICE"
+ENDPROC
+DEF PROCcollision
+    IFGS(g)=gsDEAD ENDPROC
+    IFGM(g)=0 RU=0:ENDPROC
+    GS(g)=gsDEAD:GCT(g)=OST%(gtGDS):PROCscore(GMS):GMS=GMS*2
+ENDPROC
+DEF PROCtime
+    dt=TIME-ET:ET=TIME:PAT=PAT-dt:PWT=PWT-dt
+    IFGGT>0 GGT=GGT-dt:IFGGT<=0 FORj=0TO3:GM(j)=0:NEXTj
+    FORj=0TO3:GAT(j)=GAT(j)-dt:GST(j)=GST(j)-dt:NEXTj:STM=STM-dt
+ENDPROC
+DEF FNzeroString(s)
+=RIGHT$("00000"+STR$(s),6)
+DEF PROCgameState
+    IFST=gsPTRL ST=gsHUNT:STM=OST%(gtSH) ELSE ST=gsPTRL:STM=OST%(gtSP)
+    FORg=0TO3:IFGS(g)=gsHUNT OR GS(g)=gsPTRL GD(g)=OP(GD(g)):GS(g)=ST
+    NEXTg
+ENDPROC
+DEF PROCkey
+    IFK=139 OR K=87 PDX=0:PDY=-1
+    IFK=137 OR K=68 PDX=1:PDY=0
+    IFK=138 OR K=83 PDX=0:PDY=1
+    IFK=136 OR K=65 PDX=-1:PDY=0
+    IFK=75 RU=0
+ENDPROC
+    
+DEF PROCmovePlayer
+    PAT=OST%(gtPS):os=OS(AP,PX+PDX,PY+PDY):IFos>2 PNX=PDX:PNY=PDY
+    os=OS(AP,PX+PNX,PY+PNY):IFos=1 OR os=2 PRINTTAB(PX,PY);PA$(PD,PAF):ENDPROC
+    PRINTTAB(PX,PY);" ":IFos=0 os=FNwrapPlayer
+    PX=PX+PNX:PY=PY+PNY:IFos=4 PDE(AP)=PDE(AP)+1:PROCscore(1)
+    IFos=5 PROCpowerup
+    IFos=3 PAT=15
+    IFPNX = -1 PD=3 ELSE IFPNX = 1 PD=1
+    IFPNY = -1 PD=0 ELSE IFPNY = 1 PD=2
+    PRINTTAB(PX,PY);PA$(PD,PAF):PAF=(PAF+1)MOD4
+ENDPROC
+DEF PROCscore(s)
+    PS(AP)=PS(AP)+s:IFPS(AP)>HS HS=PS(AP):PRINTTAB(26,3);FNzeroString(HS)
+    OS(AP,PX,PY)=3:PRINTTAB(26,12);FNzeroString(PS(AP))
+    IFPDE(AP)=LSS(AL) PNL(AP)=-1:PV(AP)=(AL+1)MOD(LC+1)
+ENDPROC
+DEF FNwrapPlayer
+    IFPNX<0 PX=24 ELSE PX=0
+=OS(AP,PX+PNX,PY+PNY)
+DEF PROCmoveGhost
+    GAT(g)=GCT(g):GAF(g)=(GAF(g)+1)MOD4:c=GX(g):r=GY(g):PRINTTAB(c,r);LL$(OS(AP,c,r))
+    IFGM(g)=1 AND (GS(g)=gsPTRL OR GS(g)=gsHUNT) PROCghostWalk ELSE PROCbehaviors
+    IFGS(g)=gsDEAD gp=GA(4,GD(g),GAF(g)) ELSE gp=GA(g,GD(g),GAF(g))
+    f=(GGT AND 1):IFGM(g)>0 AND GS(g)<>gsDEAD IF GGT>12*GCT(g) OR f=1 gp=gp+128
+    PRINTTAB(GX(g),GY(g));CHR$(gp)
+ENDPROC
+DEF PROCbehaviors
+    IFGS(g)=gsPTRL PROCptrl
+    IFGS(g)=gsHUNT PROChunt
+    IFGS(g)=gsDEAD PROCdead
+    IFGS(g)=gsHOLD PROChold
+    IFGS(g)=gsEXIT PROCexit
+ENDPROC
+DEF PROCmove
+    dx=GTX(g)-GX(g):dy=GTY(g)-GY(g):i=0
+    IFABS(dx)<ABS(dy) PROCpriY ELSE PROCpriX
+    GD(g)=dd:IFos=0 GX(g)=FNwrapGhost
+ENDPROC
+DEF PROCpriY
+    IFdy>0 dd=2 ELSE dd=0
+    IFOP(dd)=GD(g) PROCpriX:ENDPROC
+    PROCtryMove
+ENDPROC 
+DEF PROCpriX
+    IFdx>0 dd=1 ELSE dd=3
+    IFOP(dd)=GD(g) PROCpriY:ENDPROC
+    PROCtryMove
+ENDPROC
+DEF PROCtryMove
+    FORi=0TO3:gnx=GX(g)+DIX(dd):gny=GY(g)+DIY(dd):os=OS(AP,gnx,gny)
+    IFos=2 AND GS(g)=gsDEAD os=3
+    IFos<>1 AND os<>2 GX(g)=gnx:GY(g)=gny:ENDPROC
+    dd=NE(GD(g),i):NEXTi
+ENDPROC
+DEF FNwrapGhost
+    IFGX(g)=0 =23 ELSE =1
+DEF PROCptrl
+    GTX(g)=LTX(g):GTY(g)=LTY(g):PROCmove
+ENDPROC
+DEF PROChunt
+    GTX(g)=PX+HOX(g,PD):GTY(g)=PY+HOY(g,PD):PROCmove
+ENDPROC
+DEF PROCghostWalk
+    dd=NE(GD(g),RND(3)-1):PROCtryMove:GD(g)=dd:IFos=0 GX(g)=FNwrapGhost
+ENDPROC
+DEF PROCdead
+    GTX(g)=LEX(AL):GTY(g)=LEY(AL)+2:PROCmove
+    IFGX(g)=GTX(g) AND GY(g)=GTY(g) GS(g)=gsEXIT:GM(g)=0:GCT(g)=OST%(gtGNS)
+ENDPROC
+DEF PROChold
+    IFGST(g)<=0 GS(g)=gsEXIT
+    IFGY(g)=GTY(g) PROCflipHold
+    IFGD(g)=0 GY(g)=GY(g)-1 ELSE GY(g)=GY(g)+1
+ENDPROC
+DEF PROCflipHold
+    IFGD(g)=0 GTY(g)=GY(g)+2 ELSE GTY(g)=GY(g)-2
+    GD(g)=2-GD(g)
+ENDPROC
+DEF PROCexit
+    IFGX(g)<LEX(AL) GD(g)=1:GX(g)=GX(g)+1:ENDPROC
+    IFGX(g)>LEX(AL) GD(g)=3:GX(g)=GX(g)-1:ENDPROC
+    IFGY(g)>=LEY(AL) GD(g)=0:GY(g)=GY(g)-1:ENDPROC
+    GS(g)=ST
+ENDPROC
+DEF PROCpowerup
+    GMS=200:PDE(AP)=PDE(AP)+1:PROCscore(5):GGT=OST%(gtGML):FORi=0TO3
+    IFPX=PWX(AL,i) AND PY=PWY(AL,i) PWX(AL,i)=-1
+    IFGS(i)<gsDEAD GM(i)=1:IFGS(i)<>gsHOLD GD(i)=OP(GD(i))
+    NEXTi
+ENDPROC
+DEF PROCanimatePowerups
+    PWF=1-PWF:FORi=0TO3:IFPWX(AL,i)>=0 PRINTTAB(PWX(AL,i),PWY(AL,i));PWA$(PWF)
+    NEXTi:PWT=OST%(gtPA)
+ENDPROC
+DEF PROCdie
+    FORi=0TO3:PAT=OST%(gtPS):REPEAT:PROCtime:UNTIL PAT<0:PRINTTAB(PX,PY);PA$(4,i);TAB(0,23);
+    NEXTi:PL(AP)=PL(AP)-1:IFPL(AP)=0 PROCgameOver
+    IFNAP>0 AND PL(1-AP)>0 AP=1-AP:SL=-1
+    FORi=0TO3:PRINTTAB(GX(i),GY(i));LL$(OS(AP,GX(i),GY(i))):NEXTi
+ENDPROC
+DEF PROCgameOver
+    PRINTTAB(25,16);"GAME OVER":i=TIME:REPEAT UNTIL TIME-i>OST%(gtIH):SL=-1:PRINTTAB(25,16);"         "
+ENDPROC
+DEF PROCshowLevel
+    FORr=0TO23:PRINTTAB(1,r);:FORc=1TO23:v=OS(AP,c,r):IFv=2 v=3
+    PRINTLL$(v);:NEXTc,r:PRINTTAB(PX,PY);PA$(PD,0)
+    FORi=0TO3:PRINTTAB(GX(i),GY(i));CHR$(GA(i,GD(i),0)):NEXTi
+ENDPROC
+DEF PROClevelPrep
+    AL=PV(AP):d=0:PDE(AP)=0:pw=0:FORr=0TO23:OS(AP,0,r)=0:OS(AP,24,r)=0
+    FORc=1TO23:v=LS(AL,c,r):IFv=4 OR v=5 d=d+1
+    IFv=2 LEX(AL)=c:LEY(AL)=r
+    IFv=5 PWX(AL,pw)=c:PWY(AL,pw)=r:pw=pw+1
+    IFv>5 PROCactorPosition
+    OS(AP,c,r)=v:NEXTc, r:LSS(AL)=d
+ENDPROC
+DEF PROCactorPosition
+    IFv=10 PSX(AP)=c:PSY(AP)=r ELSE GSX(AP,v-6)=c:GSY(AP,v-6)=r
+    v=3
+ENDPROC
+DEF PROClevelLayoutsAndCal
+    FORi=0TOLC:FORr=0TO23:READd$:FORc=1TO23:LS(i,c,r)=ASC(MID$(d$,c,1))-96:NEXTc,r,i
+ENDPROC
+DATA 2,21,1,0,-1,0,2,0,-2,0,1,0,-2,2,2,0,3
+DATA 3,3,1,1,0,0,-2,1,2,0,2,0,2,3,-2,0,0
+DATA 0,21,22,0,1,0,0,3,0,0,0,0,0,1,0,0,2
+DATA 1,3,22,-1,0,2,-2,2,2,2,3,-2,2,0,-2,-2,1
+DATA 12,20,500,300,10,18,200,3500,2000,1000,50
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA addddddddddadddddddddda
+DATA aeaaadaaaadadaaaadaaaea
+DATA adaaadaaaadadaaaadaaada
+DATA addddddddddddddddddddda
+DATA adaaadadaaaaaaadadaaada
+DATA adddddaddddaddddaddddda
+DATA aaaaadaaaacacaaaadaaaaa
+DATA acccadaccccfccccadaccca
+DATA acccadacaaabaaacadaccca
+DATA aaaaadacaccgccacadaaaaa
+DATA cccccdccacccccaccdccccc
+DATA aaaaadacaiccchacadaaaaa
+DATA acccadacaaaaaaacadaccca
+DATA acccadacccccccccadaccca
+DATA aaaaadacaaaaaaacadaaaaa
+DATA addddddddddadddddddddda
+DATA adaaadaaaadadaaaadaaada
+DATA aeddaddddddjddddddaddea
+DATA aaadadadaaaaaaadadadaaa
+DATA adddddaddddaddddaddddda
+DATA adaaaaaaaadadaaaaaaaada
+DATA addddddddddddddddddddda
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA adddddadddddddddaddddda
+DATA aeaaadadaaaaaaadadaaaea
+DATA addddddddddddddddddddda
+DATA aaadadaaaadadaaaadadaaa
+DATA aaadadaaaadadaaaadadaaa
+DATA cccdaddddddaddddddadccc
+DATA aaadaaacaaaaaaacaaadaaa
+DATA ccadcccccccfcccccccdacc
+DATA ccadaaacaaabaaacaaadacc
+DATA ccadacccaccgccacccadacc
+DATA ccadacacacccccacacadacc
+DATA ccadacacaiccchacacadacc
+DATA aaadacacaaaaaaacacadaaa
+DATA cccdccacccccccccaccdccc
+DATA aaadaaaaaacacaaaaaadaaa
+DATA ccadddddcccacccdddddacc
+DATA aaadaaadaaaaaaadaaadaaa
+DATA addddddddddjdddddddddda
+DATA adaaadaaaadadaaaadaaada
+DATA adacadaddddaddddadacada
+DATA aeaaadadaaaaaaadadaaaea
+DATA addddddddddddddddddddda
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA ccccccadddddddddacccccc
+DATA aaaaacadaaaaaaadacaaaaa
+DATA aeddddddddacaddddddddea
+DATA adaaaaadadacadadaaaaada
+DATA adadddddadaaadadddddada
+DATA adadaaacadddddadaaadada
+DATA adddddacaaaaaaacaddddda
+DATA aaaaadaccccfccccadaaaaa
+DATA adddddacaaabaaacaddddda
+DATA adaaadacaccgccacadaaada
+DATA adddadacacccccacadaddda
+DATA aaadadacaiccchacadadaaa
+DATA ccadadccaaaaaaaccdadacc
+DATA ccadadacccccccccadadacc
+DATA ccadadaaacaaacaaadadacc
+DATA ccadddddddacadddddddacc
+DATA aaadaaaaadaaadaaaaadaaa
+DATA cccdddaddddjddddadddccc
+DATA aaadadadaaaaaaadadadaaa
+DATA aeddaddddddaddddddaddea
+DATA adaaadaaaadadaaaadaaada
+DATA addddddddddddddddddddda
+DATA aaaaaaaaaaaaaaaaaaaaaaa
+DATA #,*,#,*,#,*,#,*,#,*,#,*,#,*,#,*,*,+,.," " 
+DATA 65,97,65,97,65,97,65,97,65,97,65,97,65,97,65,97
+DATA 66,98,66,98,66,98,66,98,66,98,66,98,66,98,66,98
+DATA 67,99,67,99,67,99,67,99,67,99,67,99,67,99,67,99
+DATA 68,100,68,100,68,100,68,100,68,100,68,100,68,100,68,100
+DATA 45,61,45,61,45,61,45,61,45,61,45,61,45,61,45,61
+DATA O,0
